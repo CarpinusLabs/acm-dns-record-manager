@@ -14,7 +14,7 @@ aws cloudformation deploy --template-file sam-template-output.yaml --stack-name 
 Afterwards, you can get the ARN of the SNS topic from the outputs of the stack either from the console or by using this command:
 
 ```
-aws cloudformation describe-stacks --stack-name acm-dns-record-manager --query "Stacks[0].Outputs[?OutputKey=='EventsTopicArn'].OutputValue" --output text
+aws cloudformation describe-stacks --stack-name acm-dns-record-manager --query "Stacks[0].Outputs[?OutputKey=='CloudFormationEventsTopicArn'].OutputValue" --output text
 ```
 
 You refer to this SNS topic ARN when a new CloudFormation stack with a ACM Certificate resource is created for which the DNS validation records shoudl be added automatically.
