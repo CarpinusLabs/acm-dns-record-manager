@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Application for processing events from CloudFormation to create CNAME records in Route 53 for certificates issued by Amazon Certificate Manager (ACM) with DNS validation method.
+
+Resources:
+
+  CloudFormationEventsTopic:
+    Type: AWS::SNS::Topic
+
+  ProcessCloudFormationEventsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: nodejs8.10
+      Timeout: 60
+      Handler: index.handler
+      CodeUri: src/
+      Role:
+        Fn::GetAtt: ProcessCloudFormationEventsFunctionRole.Arn
+      Events:
+        Notification:
+          Type: SNS
+          Properties:
+            Topic:
+              Ref: CloudFormationEventsTopic
+
+  ProcessCloudFormationEventsFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: "ChangeResourceRecordSetsPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "route53:ChangeResourceRecordSets"
+                Resource:
+                  - "*"
+        - PolicyName: "GetCertificateDetailsPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "acm:DescribeCertificate"
+                  - "acm:ListTagsForCertificate"
+                Resource:
+                  - "*"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+Outputs:
+
+  CloudFormationEventsTopicArn:
+    Description: The ARN of the SNS topic to which CloudFormation should send events
+    Value:
+      Ref: CloudFormationEventsTopic
