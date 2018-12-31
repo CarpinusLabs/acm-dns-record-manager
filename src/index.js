@@ -17,13 +17,17 @@ exports.processEvent = async (event) => {
   if (message.ResourceStatus === 'CREATE_IN_PROGRESS' && message.ResourceType === 'AWS::CertificateManager::Certificate' && message.PhysicalResourceId !== undefined) {
     const certificate_arn = message.PhysicalResourceId;
 
+    console.log(`Getting Hosted Zone ID for certificate ${certificate_arn}...`);
     const hostedZoneId = await getHostedZoneIdForCertificate(certificate_arn);
     if (hostedZoneId === null) {
+      console.log(`Failed to get Hosted Zone ID for certificate ${certificate_arn}. Make sure to assign it by adding the tag "HostedZoneID".`);
       return;
     }
 
+    console.log(`Getting resource records for certificate ${certificate_arn}...`);
     const resource_records = await getResourceRecordsForCertificate(certificate_arn);
 
+    console.log(`Creating resource records for certificate ${certificate_arn}...`);
     await Promise.all(resource_records.map((record) => {
       return this.createCNAMERecord(record, hostedZoneId);
     }));
@@ -44,7 +48,7 @@ async function getHostedZoneIdForCertificate(arn) {
 
     return tags.length === 0 ? null : tags[0].Value;
   } catch (error) {
-    console.log('Failed to get HostedZoneId for certificate ' + arn);
+    console.log('Failed to get tags for certificate ' + arn);
     throw error;
   }
 }
