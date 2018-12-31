@@ -4,6 +4,12 @@ This application processes events from CloudFormation to create CNAME records in
 
 ## Installation
 
+### Serverless Application Repository
+
+The application is available in the [AWS Serverless Application Repository](https://aws.amazon.com/serverless/serverlessrepo/) and can be [deployed directly from there](https://serverlessrepo.aws.amazon.com/#/applications/arn:aws:serverlessrepo:us-east-1:022876999554:applications~acm-dns-record-manager). This is the easiest and most convenient way.
+
+### Manually
+
 The application can be installed by running the following commands:
 
 ```
