@@ -37,7 +37,7 @@ async function getHostedZoneIdForCertificate(arn) {
     CertificateArn: arn
   };
 
-  try {
+  try {
     const result = await acm.listTagsForCertificate(params).promise();
 
     const tags = result.Tags.filter((tag) => {
@@ -95,7 +95,7 @@ async function createCNAMERecord(records, hostedZoneId) {
         TTL: 300,
         Type: record.Type
       }
-    }
+    };
   });
 
   const params = {
@@ -106,12 +106,12 @@ async function createCNAMERecord(records, hostedZoneId) {
   };
 
   try {
-    const result = await route53.changeResourceRecordSets(params).promise();
+    await route53.changeResourceRecordSets(params).promise();
   } catch (error) {
     console.log('Failed to create Route 53 record set: ' + error);
     throw error;
   }
-};
+}
 
 function parseMessage(message) {
   const regexp = /(.+)='([^']*)'/g;
