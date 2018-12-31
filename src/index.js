@@ -12,12 +12,10 @@ exports.handler = async (event) => {
 };
 
 exports.processEvent = async (event) => {
-  let message = event.Sns.Message;
+  let message = parseMessage(event.Sns.Message);
 
-  if (message.indexOf("ResourceStatus='CREATE_IN_PROGRESS'") != -1 && message.indexOf("ResourceType='AWS::CertificateManager::Certificate'") != -1 && message.indexOf("PhysicalResourceId=") != -1) {
-    const regexp = /PhysicalResourceId='(.+)'\n/;
-    const result = regexp.exec(message);
-    const certificate_arn = result[1];
+  if (message.ResourceStatus === 'CREATE_IN_PROGRESS' && message.ResourceType === 'AWS::CertificateManager::Certificate' && message.PhysicalResourceId !== undefined) {
+    const certificate_arn = message.PhysicalResourceId;
 
     const hostedZoneId = await getHostedZoneIdForCertificate(certificate_arn);
     if (hostedZoneId === null) {
@@ -110,6 +108,18 @@ exports.createCNAMERecord = async (record, hostedZoneId) => {
     throw error;
   }
 };
+
+function parseMessage(message) {
+  const regexp = /(.+)='([^']*)'/g;
+
+  let msg = {};
+  let result;
+  while((result = regexp.exec(message)) !== null) {
+    msg[result[1]] = result[2].trim();
+  }
+
+  return msg;
+}
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
