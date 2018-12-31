@@ -43,6 +43,7 @@ Resources:
               - Effect: "Allow"
                 Action:
                   - "route53:ChangeResourceRecordSets"
+                  - "route53:ListResourceRecordSets"
                 Resource:
                   - "*"
         - PolicyName: "GetCertificateDetailsPolicy"
