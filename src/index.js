@@ -28,9 +28,7 @@ exports.processEvent = async (event) => {
     const resource_records = await getResourceRecordsForCertificate(certificate_arn);
 
     console.log(`Creating resource records for certificate ${certificate_arn}...`);
-    await Promise.all(resource_records.map((record) => {
-      return this.createCNAMERecord(record, hostedZoneId);
-    }));
+    await createCNAMERecord(resource_records, hostedZoneId);
   }
 };
 
@@ -83,24 +81,26 @@ async function doGetResourceRecordsForCertificate(arn) {
   }
 }
 
-exports.createCNAMERecord = async (record, hostedZoneId) => {
+async function createCNAMERecord(records, hostedZoneId) {
+  const changes = records.map((record) => {
+    return {
+      Action: 'CREATE',
+      ResourceRecordSet: {
+        Name: record.Name,
+        ResourceRecords: [
+          {
+            Value: record.Value
+          }
+        ],
+        TTL: 300,
+        Type: record.Type
+      }
+    }
+  });
+
   const params = {
     ChangeBatch: {
-      Changes: [
-        {
-          Action: 'CREATE',
-          ResourceRecordSet: {
-            Name: record.Name,
-            ResourceRecords: [
-              {
-                Value: record.Value
-              }
-            ],
-            TTL: 300,
-            Type: record.Type
-          }
-        }
-      ]
+      Changes: changes
     },
     HostedZoneId: hostedZoneId
   };
