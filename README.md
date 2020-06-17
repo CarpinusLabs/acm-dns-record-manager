@@ -2,6 +2,8 @@
 
 This application processes events from CloudFormation to create CNAME records in Route 53 for certificates issued by _Amazon Certificate Manager_ (ACM) with DNS validation method.
 
+>**Update:** CloudFormation supports [automatic certificate validation via DNS](https://aws.amazon.com/de/about-aws/whats-new/2020/06/aws-certificate-manager-extends-automation-certificate-issuance-via-cloudformation/) now. Therefore, this application is no longer needed.
+
 ## Installation
 
 ### Serverless Application Repository
